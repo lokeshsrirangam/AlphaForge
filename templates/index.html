@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 
-{% block title %}Trading Strategy Backtester{% endblock %}
+{% block title %}AlphaForge{% endblock %}
 
 {% block content %}
 <div class="hero bg-primary text-white">
     <div class="container py-5">
         <div class="row align-items-center">
             <div class="col-lg-7">
-                <h1 class="display-4 fw-bold mb-3">Trading Strategy Backtester</h1>
-                <p class="lead">Test your moving average crossover strategy with our advanced backtesting engine. Simulate trades, analyze performance, and refine your approach—all in one place.</p>
-                <p class="small mb-4">From the book: <a href="https://www.amazon.com/dp/B0F3S8FQ7C" class="text-white text-decoration-underline">Practical Python for Effective Algorithmic Trading</a></p>
+                <h1 class="display-4 fw-bold mb-3">AlphaForge</h1>
+                <p class="lead">Backtest a moving-average trend strategy on real prices, with trading costs, volatility targeting and a buy &amp; hold comparison on the same window.</p>
+                <p class="small mb-4">Built by <a href="https://github.com/lokeshsrirangam" class="text-white text-decoration-underline" target="_blank" rel="noopener">Lokesh Srirangam</a></p>
                 <div class="d-flex gap-3 mt-4">
                     <button class="btn btn-light btn-lg px-4" id="runDefaultBtn">Run Default Test</button>
                     <a href="#backtester" class="btn btn-outline-light btn-lg px-4">Customize Test</a>
@@ -31,23 +31,46 @@
                 </div>
                 <div class="card-body">
                     <form id="backtestForm">
-                        <h5 class="card-title mb-3">Market Simulation</h5>
+                        <h5 class="card-title mb-3">Market Data</h5>
                         <div class="mb-3">
-                            <label for="days" class="form-label">Number of Days</label>
-                            <input type="number" class="form-control" id="days" name="days" value="100" min="30" max="1000">
-                            <div class="form-text">How many trading days to simulate</div>
+                            <label for="data_source" class="form-label">Data Source</label>
+                            <select class="form-select" id="data_source" name="data_source">
+                                <option value="yahoo" selected>Real prices (Yahoo Finance)</option>
+                                <option value="synthetic">Synthetic random walk (engine test only)</option>
+                            </select>
+                            <div class="form-text">Synthetic data has no edge by design. Use real data to judge a strategy.</div>
                         </div>
-                        <div class="mb-3">
-                            <label for="start_price" class="form-label">Starting Price</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" class="form-control" id="start_price" name="start_price" value="100" min="1" step="0.01">
+                        <div id="yahooFields">
+                            <div class="mb-3">
+                                <label for="ticker" class="form-label">Ticker</label>
+                                <input type="text" class="form-control" id="ticker" name="ticker" value="^NSEI">
+                                <div class="form-text">Examples: ^NSEI (Nifty 50), RELIANCE.NS, SPY, BTC-USD</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label for="start_date" class="form-label">Start</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" value="2012-01-01">
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label for="end_date" class="form-label">End</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date">
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="volatility" class="form-label">Price Volatility</label>
-                            <input type="number" class="form-control" id="volatility" name="volatility" value="0.015" min="0.001" max="0.05" step="0.001">
-                            <div class="form-text">Daily price volatility (0.015 = 1.5%)</div>
+                        <div id="syntheticFields" class="d-none">
+                            <div class="mb-3">
+                                <label for="synthetic_days" class="form-label">Number of Days</label>
+                                <input type="number" class="form-control" id="synthetic_days" name="synthetic_days" value="1500" min="200" max="5000">
+                            </div>
+                            <div class="mb-3">
+                                <label for="synthetic_vol" class="form-label">Daily Volatility</label>
+                                <input type="number" class="form-control" id="synthetic_vol" name="synthetic_vol" value="0.01" min="0.001" max="0.05" step="0.001">
+                            </div>
+                            <div class="mb-3">
+                                <label for="seed" class="form-label">Random Seed</label>
+                                <input type="number" class="form-control" id="seed" name="seed" value="42" min="0">
+                                <div class="form-text">Same seed gives the same prices every run</div>
+                            </div>
                         </div>
                         
                         <hr class="my-4">
@@ -81,21 +104,35 @@
                         
                         <hr class="my-4">
                         
-                        <h5 class="card-title mb-3">Trading Settings</h5>
+                        <h5 class="card-title mb-3">Trading &amp; Risk</h5>
                         <div class="mb-3">
                             <label for="initial_capital" class="form-label">Initial Capital</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" class="form-control" id="initial_capital" name="initial_capital" value="10000" min="1000" step="1000">
-                            </div>
+                            <input type="number" class="form-control" id="initial_capital" name="initial_capital" value="100000" min="1000" step="1000">
+                        </div>
+                        <div class="mb-3">
+                            <label for="cost_bps" class="form-label">Trading Cost (bps per trade)</label>
+                            <input type="number" class="form-control" id="cost_bps" name="cost_bps" value="10" min="0" max="200" step="1">
+                            <div class="form-text">Brokerage + taxes + slippage. 10 bps = 0.10% of the amount traded</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="target_vol" class="form-label">Target Volatility (% per year)</label>
+                            <input type="number" class="form-control" id="target_vol" name="target_vol" value="15" min="0" max="100" step="1">
+                            <div class="form-text">Shrinks the position when the market gets wild. 0 = always fully invested</div>
                         </div>
                         <div class="mb-3">
                             <label for="stop_loss" class="form-label">Stop Loss (%)</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" id="stop_loss" name="stop_loss" value="5" min="0" max="20" step="0.5">
+                                <input type="number" class="form-control" id="stop_loss" name="stop_loss" value="0" min="0" max="50" step="0.5">
                                 <span class="input-group-text">%</span>
                             </div>
-                            <div class="form-text">0% to disable stop loss</div>
+                            <div class="form-text">Checked on closing prices only. 0 disables it</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="execution_lag" class="form-label">Execution</label>
+                            <select class="form-select" id="execution_lag" name="execution_lag">
+                                <option value="1" selected>Next close (realistic)</option>
+                                <option value="0">Same close (optimistic)</option>
+                            </select>
                         </div>
                         
                         <button type="button" id="runBacktestBtn" class="btn btn-primary w-100 mt-3">
@@ -119,13 +156,17 @@
                         <li><strong>Stop Loss:</strong> Exits the position if price falls below a specified percentage from entry</li>
                     </ul>
                     <p>This approach aims to capture trending movements while managing risk with automatic stop losses.</p>
-                    <p class="text-muted small">Learn more advanced strategies in the book <a href="https://www.amazon.com/dp/B0F3S8FQ7C">Practical Python for Effective Algorithmic Trading</a>.</p>
+
                 </div>
             </div>
         </div>
         
         <div class="col-lg-8">
             <div id="resultsContainer" class="d-none">
+                <div id="warnings" class="alert alert-warning d-none">
+                    <strong>Read this before trusting the numbers</strong>
+                    <ul class="mb-0 mt-2" id="warningList"></ul>
+                </div>
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">Performance Summary</h4>
@@ -221,6 +262,34 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row text-center mt-3">
+                            <div class="col-md-2 col-6 mb-3"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+                                <h6 class="text-muted mb-1">Sharpe</h6><h4 id="sharpe">0.00</h4>
+                                <div class="small text-muted" id="sharpeSE"></div></div></div></div>
+                            <div class="col-md-2 col-6 mb-3"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+                                <h6 class="text-muted mb-1">Sortino</h6><h4 id="sortino">0.00</h4></div></div></div>
+                            <div class="col-md-2 col-6 mb-3"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+                                <h6 class="text-muted mb-1">Calmar</h6><h4 id="calmar">0.00</h4></div></div></div>
+                            <div class="col-md-2 col-6 mb-3"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+                                <h6 class="text-muted mb-1">Volatility</h6><h4 id="annVol">0.00%</h4></div></div></div>
+                            <div class="col-md-2 col-6 mb-3"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+                                <h6 class="text-muted mb-1">Time in Market</h6><h4 id="exposure">0%</h4></div></div></div>
+                            <div class="col-md-2 col-6 mb-3"><div class="card h-100 border-0 shadow-sm"><div class="card-body">
+                                <h6 class="text-muted mb-1">Cost Drag</h6><h4 id="costDrag">0.00%</h4></div></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="mb-0">Strategy vs Buy &amp; Hold</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0" id="benchTable">
+                            <thead class="table-light"><tr><th>Metric</th><th>Strategy</th><th>Buy &amp; Hold</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
                 
@@ -273,8 +342,8 @@
                                         <th>Entry Price</th>
                                         <th>Exit Date</th>
                                         <th>Exit Price</th>
-                                        <th>Shares</th>
-                                        <th>P/L ($)</th>
+                                        <th>Avg Size</th>
+                                        <th>P/L</th>
                                         <th>P/L (%)</th>
                                         <th>Duration</th>
                                         <th>Exit Reason</th>
@@ -287,18 +356,7 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="alert alert-info">
-                    <div class="d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fas fa-lightbulb fa-2x"></i>
-                        </div>
-                        <div>
-                            <strong>Want to take your trading strategies to the next level?</strong>
-                            <p class="mb-0 mt-1">Join our community at <a href="https://www.skool.com/the-quantitative-elite" target="_blank">The Quantitative Elite</a> to learn advanced techniques and get support from fellow algorithmic traders. You can also check out the <a href="https://www.amazon.com/dp/B0F3S8FQ7C" target="_blank">book</a> for in-depth explanations and more sophisticated strategies.</p>
-                        </div>
-                    </div>
-                </div>
+
             </div>
             
             <div id="initialMessage" class="text-center py-5">
@@ -319,25 +377,25 @@
             <div class="col-md-6 mb-4 mb-md-0">
                 <h2>Why Use This Backtester?</h2>
                 <ul class="list-group list-group-flush mt-3">
-                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Test your trading strategy on simulated market data</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Test your trading strategy on real market data, net of trading costs</li>
                     <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Visualize trades with interactive charts</li>
                     <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Calculate key performance metrics</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Customize parameters to optimize results</li>
-                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Based on proven algorithmic trading techniques</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Compare against buy &amp; hold over the same window</li>
+                    <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Warns you when a result is statistically weak</li>
                 </ul>
             </div>
             <div class="col-md-6">
-                <h2>Next Steps</h2>
-                <p>Ready to advance your algorithmic trading skills? Here's how to continue your journey:</p>
+                <h2>Explore</h2>
+                <p>How the engine works, what each metric means, and where the code lives:</p>
                 <div class="d-grid gap-3">
-                    <a href="https://www.amazon.com/dp/B0F3S8FQ7C" class="btn btn-outline-primary" target="_blank">
-                        <i class="fas fa-book me-2"></i> Get the Complete Book
+                    <a href="/docs" class="btn btn-outline-primary">
+                        <i class="fas fa-file-alt me-2"></i> Read the Documentation
                     </a>
-                    <a href="https://www.skool.com/the-quantitative-elite" class="btn btn-outline-primary" target="_blank">
-                        <i class="fas fa-users me-2"></i> Join the Trading Community
+                    <a href="/about" class="btn btn-outline-primary">
+                        <i class="fas fa-info-circle me-2"></i> Design Decisions &amp; Limitations
                     </a>
-                    <a href="https://www.youtube.com/@KuldeepSinghAlgo" class="btn btn-outline-primary" target="_blank">
-                        <i class="fab fa-youtube me-2"></i> Watch Video Tutorials
+                    <a href="https://github.com/lokeshsrirangam" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                        <i class="fab fa-github me-2"></i> GitHub Profile
                     </a>
                 </div>
             </div>
@@ -347,136 +405,116 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <script>
+    const DEFAULTS = {
+        data_source: "yahoo", ticker: "^NSEI", start_date: "2012-01-01", end_date: "",
+        short_period: 10, long_period: 30, ma_type: "sma",
+        initial_capital: 100000, cost_bps: 10, target_vol: 15, stop_loss: 0, execution_lag: 1
+    };
+
+    function setSigned(sel, text, cls) {
+        $(sel).text(text).toggleClass("text-success", cls === "positive").toggleClass("text-danger", cls !== "positive");
+    }
+
     $(document).ready(function() {
-        // Run backtest with default parameters or custom parameters
+        $("#data_source").change(function() {
+            const synthetic = $(this).val() === "synthetic";
+            $("#syntheticFields").toggleClass("d-none", !synthetic);
+            $("#yahooFields").toggleClass("d-none", synthetic);
+        });
+
         $("#runBacktestBtn, #runDefaultBtn, #runDefaultBtn2").click(function() {
-            // Show loading spinner
             $("#loadingSpinner").removeClass("d-none");
             $("#runBacktestBtn").prop("disabled", true);
-            
-            // Prepare form data
+
             let formData = {};
             if (this.id === "runDefaultBtn" || this.id === "runDefaultBtn2") {
-                // Use default values
-                formData = {
-                    days: 100,
-                    start_price: 100,
-                    volatility: 0.015,
-                    short_period: 10,
-                    long_period: 30,
-                    initial_capital: 10000,
-                    stop_loss: 5,
-                    ma_type: "sma"
-                };
+                formData = Object.assign({}, DEFAULTS);
             } else {
-                // Get form values
-                $("#backtestForm").serializeArray().forEach(function(field) {
-                    formData[field.name] = field.value;
-                });
+                $("#backtestForm").serializeArray().forEach(function(f) { formData[f.name] = f.value; });
             }
-            
-            // Make AJAX request
+
             $.ajax({
-                url: "/api/backtest",
-                type: "POST",
-                contentType: "application/json",
+                url: "/api/backtest", type: "POST", contentType: "application/json",
                 data: JSON.stringify(formData),
-                success: function(response) {
-                    // Hide loading elements
+                success: function(r) {
                     $("#loadingSpinner").addClass("d-none");
                     $("#runBacktestBtn").prop("disabled", false);
                     $("#initialMessage").addClass("d-none");
                     $("#resultsContainer").removeClass("d-none");
-                    
-                    // Update performance metrics
-                    $("#initialCapital").text(response.metrics.initial_capital);
-                    $("#finalValue").text(response.metrics.final_value);
-                    
-                    // Style positive/negative returns
-                    if (response.metrics.total_return_class === "positive") {
-                        $("#totalReturn").text(response.metrics.total_return).addClass("text-success").removeClass("text-danger");
-                    } else {
-                        $("#totalReturn").text(response.metrics.total_return).addClass("text-danger").removeClass("text-success");
-                    }
-                    
-                    if (response.metrics.annualized_return_class === "positive") {
-                        $("#annualizedReturn").text(response.metrics.annualized_return).addClass("text-success").removeClass("text-danger");
-                    } else {
-                        $("#annualizedReturn").text(response.metrics.annualized_return).addClass("text-danger").removeClass("text-success");
-                    }
-                    
-                    // Update trade statistics
-                    $("#totalTrades").text(response.metrics.total_trades);
-                    $("#winRate").text(response.metrics.win_rate);
-                    $("#avgWin").text(response.metrics.avg_win);
-                    $("#avgLoss").text(response.metrics.avg_loss);
-                    $("#profitFactor").text(response.metrics.profit_factor);
-                    $("#maxDrawdown").text(response.metrics.max_drawdown);
-                    
-                    // Update trade history table
-                    const tradeHistoryBody = $("#tradeHistory");
-                    tradeHistoryBody.empty();
-                    
-                    response.trades.forEach(function(trade) {
-                        const row = $("<tr></tr>");
-                        row.append(`<td>${trade.entry_date}</td>`);
-                        row.append(`<td>${trade.entry_price}</td>`);
-                        row.append(`<td>${trade.exit_date}</td>`);
-                        row.append(`<td>${trade.exit_price}</td>`);
-                        row.append(`<td>${trade.shares}</td>`);
-                        
-                        if (trade.profit_loss_class === "positive") {
-                            row.append(`<td class="text-success">${trade.profit_loss}</td>`);
-                            row.append(`<td class="text-success">${trade.profit_loss_percent}</td>`);
-                        } else {
-                            row.append(`<td class="text-danger">${trade.profit_loss}</td>`);
-                            row.append(`<td class="text-danger">${trade.profit_loss_percent}</td>`);
-                        }
-                        
-                        row.append(`<td>${trade.duration}</td>`);
-                        row.append(`<td>${trade.exit_reason}</td>`);
-                        
-                        tradeHistoryBody.append(row);
+
+                    const m = r.metrics;
+                    $("#initialCapital").text(m.initial_capital);
+                    $("#finalValue").text(m.final_value);
+                    setSigned("#totalReturn", m.total_return, m.total_return_class);
+                    setSigned("#annualizedReturn", m.annualized_return, m.annualized_return_class);
+                    $("#sharpe").text(m.sharpe);
+                    $("#sharpeSE").text(m.sharpe_se);
+                    $("#sortino").text(m.sortino);
+                    $("#calmar").text(m.calmar);
+                    $("#annVol").text(m.ann_vol);
+                    $("#exposure").text(m.exposure);
+                    $("#costDrag").text(m.cost_drag);
+                    $("#totalTrades").text(m.total_trades);
+                    $("#winRate").text(m.win_rate);
+                    $("#avgWin").text(m.avg_win);
+                    $("#avgLoss").text(m.avg_loss);
+                    $("#profitFactor").text(m.profit_factor);
+                    $("#maxDrawdown").text(m.max_drawdown);
+
+                    const list = $("#warningList").empty();
+                    r.warnings.forEach(function(w) { list.append($("<li></li>").text(w)); });
+                    $("#warnings").toggleClass("d-none", r.warnings.length === 0);
+
+                    const bench = $("#benchTable tbody").empty();
+                    r.comparison.forEach(function(row) {
+                        bench.append($("<tr></tr>")
+                            .append($("<td></td>").text(row.label))
+                            .append($("<td></td>").text(row.strategy))
+                            .append($("<td></td>").text(row.benchmark)));
                     });
-                    
-                    // Draw charts
-                    Plotly.newPlot('priceChart', JSON.parse(response.charts.price_chart).data, JSON.parse(response.charts.price_chart).layout);
-                    Plotly.newPlot('equityChart', JSON.parse(response.charts.equity_chart).data, JSON.parse(response.charts.equity_chart).layout);
-                    Plotly.newPlot('drawdownChart', JSON.parse(response.charts.drawdown_chart).data, JSON.parse(response.charts.drawdown_chart).layout);
-                    
-                    // Scroll to results
-                    $('html, body').animate({
-                        scrollTop: $("#resultsContainer").offset().top - 20
-                    }, 500);
+
+                    const body = $("#tradeHistory").empty();
+                    r.trades.forEach(function(t) {
+                        const color = t.profit_loss_class === "positive" ? "text-success" : "text-danger";
+                        const row = $("<tr></tr>");
+                        [t.entry_date, t.entry_price, t.exit_date, t.exit_price, t.avg_size].forEach(function(v) {
+                            row.append($("<td></td>").text(v));
+                        });
+                        row.append($("<td></td>").addClass(color).text(t.profit_loss));
+                        row.append($("<td></td>").addClass(color).text(t.profit_loss_percent));
+                        row.append($("<td></td>").text(t.duration));
+                        row.append($("<td></td>").text(t.exit_reason));
+                        body.append(row);
+                    });
+
+                    ["price", "equity", "drawdown"].forEach(function(name) {
+                        const fig = JSON.parse(r.charts[name + "_chart"]);
+                        Plotly.newPlot(name + "Chart", fig.data, fig.layout, {responsive: true});
+                    });
+
+                    $("html, body").animate({scrollTop: $("#resultsContainer").offset().top - 20}, 500);
                 },
                 error: function(xhr, status, error) {
-                    // Hide loading elements
                     $("#loadingSpinner").addClass("d-none");
                     $("#runBacktestBtn").prop("disabled", false);
-                    
-                    // Show error
-                    alert("Error running backtest: " + error);
+                    const msg = (xhr.responseJSON && xhr.responseJSON.error) || error || "Request failed";
+                    alert("Error running backtest: " + msg);
                 }
             });
         });
-        
-        // Form validation - ensure short period is less than long period
+
         $("#short_period, #long_period").change(function() {
-            const shortPeriod = parseInt($("#short_period").val());
-            const longPeriod = parseInt($("#long_period").val());
-            
-            if (shortPeriod >= longPeriod) {
+            const s = parseInt($("#short_period").val()), l = parseInt($("#long_period").val());
+            if (s >= l) {
                 alert("Short period must be less than long period");
-                $("#short_period").val(longPeriod - 1);
+                $("#short_period").val(l - 1);
             }
         });
-        
-        // Download report functionality
+
         $("#downloadReportBtn").click(function() {
-            alert("Report download functionality would be implemented here.");
-            // In a real implementation, this would generate a PDF or CSV report
+            alert("Report download is not implemented yet.");
         });
     });
 </script>

@@ -1,118 +1,55 @@
-# 🚀 AlphaForge – Quantitative Trading Strategy Backtesting Platform
+# AlphaForge
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![Flask](https://img.shields.io/badge/Flask-Web%20Application-green.svg)
-![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Analytics-blue.svg)
-![Status](https://img.shields.io/badge/Status-Active-success.svg)
+A backtesting tool for a moving-average trend strategy, built to answer one question honestly: would this rule have made money **after costs**, and is the result distinguishable from luck?
 
-## 📖 Overview
+Built with Python, pandas, NumPy, Flask and Plotly.
 
-**AlphaForge** is a quantitative trading strategy backtesting platform designed to help traders and researchers evaluate systematic trading ideas in a simulated market environment. The application provides an interactive interface for configuring trading strategies, generating signals, analyzing performance metrics, and visualizing portfolio growth.
+## What it does
 
-Built with **Python, Flask, Pandas, and Plotly**, the platform combines financial analytics with modern web technologies to create an intuitive research environment for strategy development and validation.
+- Loads adjusted daily prices from Yahoo Finance (cached on disk)
+- SMA or EMA crossover candidates, with optional close-based stop-loss
+- Volatility-targeted position sizing
+- Trading costs in basis points on every change in position
+- Next-close execution by default (same-close available, flagged as optimistic)
+- Metrics: CAGR, volatility, Sharpe (with standard error), Sortino, max drawdown, Calmar, time in market, cost drag, trade statistics
+- Strategy vs buy & hold over the same window
+- Warnings when a result is statistically weak (few trades, short sample, Sharpe within noise of zero, suspiciously high Sharpe)
 
----
+## Run it
 
-## ✨ Core Features
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m pytest -q
+python app.py        # http://127.0.0.1:5000
+```
 
-### 📈 Strategy Development
+## Methodology
 
-* Configure custom trading strategy parameters
-* Support for Simple Moving Average (SMA) and Exponential Moving Average (EMA) strategies
-* Adjustable short-term and long-term trend indicators
-* Flexible market simulation settings
+```
+day t    : see close[t], compute the signal, decide the target position
+day t+1  : order executes at close[t+1]
+day t+2  : the position earns close[t+2] / close[t+1] - 1
+```
 
-### ⚡ Backtesting Engine
+Tests in `tests/test_engine.py` check the things that make backtests lie:
 
-* Simulates trade execution using historical price movements
-* Generates automated buy and sell signals
-* Tracks capital allocation and portfolio performance
-* Evaluates strategy behavior across different market conditions
+- changing future prices cannot change past positions (no look-ahead)
+- costs always reduce returns
+- trade returns reconcile with the equity curve
+- on driftless random walks the average Sharpe is about zero (the engine does not manufacture edge)
 
-### 📊 Performance Analytics
+## Limitations
 
-* Measure overall portfolio returns
-* Analyze win rate and trade performance
-* Evaluate risk exposure and drawdowns
-* Monitor portfolio growth over time
+One instrument at a time, long-only, daily bars. Stops are checked on closing prices only. Free Yahoo data can contain errors. A good backtest is not a forecast, and nothing here is investment advice.
 
-### 📉 Interactive Visualization
+<!-- Results: add out-of-sample numbers here once walk-forward validation is in. -->
 
-* Dynamic price charts with trading signals
-* Portfolio equity curve analysis
-* Strategy performance dashboards
-* Interactive financial analytics powered by Plotly
+## Author
 
----
+Lokesh Srirangam - [github.com/lokeshsrirangam](https://github.com/lokeshsrirangam)
 
-## 🛠️ Technology Stack
+## Acknowledgements
 
-| Category            | Technologies                |
-| ------------------- | --------------------------- |
-| Programming         | Python                      |
-| Backend             | Flask                       |
-| Data Analysis       | Pandas, NumPy               |
-| Visualization       | Plotly                      |
-| Frontend            | HTML, CSS, Bootstrap        |
-| Financial Analytics | Trading Strategy Simulation |
-
----
-
-## 🎯 Key Highlights
-
-* Algorithmic Trading Strategy Testing
-* Moving Average Crossover Framework
-* Portfolio Performance Evaluation
-* Trade Signal Generation
-* Financial Data Visualization
-* Risk & Return Analysis
-* Quantitative Research Workflow
-* Interactive Web-Based Dashboard
-
----
-
-## 📌 Project Objectives
-
-The primary objective of AlphaForge is to provide a practical framework for researching and validating quantitative trading strategies. The platform demonstrates how financial data, trading logic, and performance analytics can be integrated into a unified system to support data-driven trading decisions.
-
-Through simulation and visualization, users can gain deeper insights into strategy effectiveness before deploying capital in live markets.
-
----
-
-## 📊 Performance Metrics
-
-The platform evaluates trading strategies using:
-
-* Total Return
-* Portfolio Growth
-* Win Rate
-* Maximum Drawdown
-* Trade Statistics
-* Risk-Reward Analysis
-* Capital Utilization
-* Strategy Consistency
-
----
-
-## 🔮 Future Enhancements
-
-* Real Market Data Integration
-* Multi-Asset Portfolio Backtesting
-* Advanced Technical Indicators (RSI, MACD, Bollinger Bands)
-* Strategy Optimization & Parameter Tuning
-* Transaction Cost Modeling
-* Machine Learning Based Signal Generation
-* Portfolio-Level Risk Management
-* Cloud Deployment & User Authentication
-
----
-
-## 💡 Why AlphaForge?
-
-AlphaForge bridges the gap between trading concepts and practical implementation by providing a hands-on environment for testing and analyzing quantitative strategies. It serves as both a learning platform and a foundation for developing more advanced algorithmic trading systems.
-
----
-
-### 📈 Turning Trading Ideas into Data-Driven Strategies
-
-**AlphaForge | Quantitative Research • Strategy Development • Performance Analytics**
+The project began from the moving-average crossover exercise in Chapter 4 of *Practical Python for Effective Algorithmic Trading* (Kuldeep Singh Rathore). The data layer, vectorised engine, metrics, tests and dashboard were rewritten for AlphaForge.
