@@ -31,8 +31,9 @@ day t+2  : the position earns close[t+2] / close[t+1] - 1</code></pre>
                             <thead class="table-light"><tr><th>Field</th><th>Meaning</th><th>Default</th></tr></thead>
                             <tbody>
                                 <tr><td><code>ticker</code>, <code>start_date</code>, <code>end_date</code></td><td>Yahoo Finance symbol and date range. End is optional.</td><td>^NSEI, 2012-01-01</td></tr>
-                                <tr><td><code>ma_type</code></td><td>"sma" or "ema"</td><td>sma</td></tr>
-                                <tr><td><code>short_period</code>, <code>long_period</code></td><td>Fast and slow moving-average windows. Long position when fast &gt; slow.</td><td>10, 30</td></tr>
+                                <tr><td><code>strategy_type</code></td><td><code>ma_crossover</code> or <code>donchian_breakout</code>. The close-based Donchian variant enters above the prior slow-window highest close and exits below the prior fast-window lowest close.</td><td>ma_crossover</td></tr>
+                                <tr><td><code>ma_type</code></td><td>Moving-average signal only: "sma" or "ema"</td><td>sma</td></tr>
+                                <tr><td><code>short_period</code>, <code>long_period</code></td><td>Fast/slow MA windows, or fast exit-channel / slow breakout-channel windows when Donchian is selected.</td><td>10, 30</td></tr>
                                 <tr><td><code>initial_capital</code></td><td>Starting portfolio value</td><td>100000</td></tr>
                                 <tr><td><code>cost_bps</code></td><td>Cost per unit traded, in basis points (10 = 0.10%). Covers brokerage, taxes and slippage.</td><td>10</td></tr>
                                 <tr><td><code>target_vol</code></td><td>Annual volatility target in percent. Position size = target / recent volatility, capped at 100%. 0 means always fully invested.</td><td>15</td></tr>
@@ -56,12 +57,19 @@ day t+2  : the position earns close[t+2] / close[t+1] - 1</code></pre>
                         <li><strong>Trades:</strong> one trade is one continuous run of holding the asset. Its return is the compounded net return over the run.</li>
                     </ul>
 
+                    <h3 class="mt-4 mb-3">Research diagnostics</h3>
+                    <ul>
+                        <li><strong>Return calendar:</strong> compounds the strategy's net daily returns within each calendar month. The first and last displayed months can be partial.</li>
+                        <li><strong>Market regime attribution:</strong> classifies each return using the previous session's close relative to its 200-session SMA, then reports conditional daily return, volatility, Sharpe and positive-session rate against buy and hold. The indicator warm-up is excluded; regime samples are non-contiguous, so no regime CAGR is reported.</li>
+                        <li><strong>Walk-forward validation:</strong> selects parameters on training windows and evaluates them on later, non-overlapping test windows. Treat the result as one out-of-sample diagnostic, not a guarantee of future performance.</li>
+                    </ul>
+
                     <h3 class="mt-4 mb-3">HTTP API</h3>
                     <p><code>POST /api/backtest</code> with a JSON body using the field names above.</p>
 <pre class="bg-light p-3 rounded"><code>curl -X POST http://127.0.0.1:5000/api/backtest \
   -H "Content-Type: application/json" \
   -d '{"ticker": "^NSEI", "start_date": "2012-01-01", "cost_bps": 10, "target_vol": 15}'</code></pre>
-                    <p>The response contains <code>meta</code>, <code>metrics</code>, <code>comparison</code> (strategy vs buy &amp; hold), <code>warnings</code>, <code>trades</code> and <code>charts</code> (Plotly JSON). Invalid input returns HTTP 400 and a data problem returns HTTP 502, both with an <code>error</code> message.</p>
+                    <p>The response contains <code>meta</code>, <code>metrics</code>, <code>comparison</code> (strategy vs buy &amp; hold), <code>regimes</code>, <code>warnings</code>, <code>trades</code> and <code>charts</code> (Plotly JSON, including the monthly return heatmap). Invalid input returns HTTP 400 and a data problem returns HTTP 502, both with an <code>error</code> message.</p>
 
                     <h3 class="mt-4 mb-3">Code layout</h3>
 <pre class="bg-light p-3 rounded mb-0"><code>app.py                 Flask routes, input validation, formatting

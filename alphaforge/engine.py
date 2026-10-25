@@ -29,6 +29,7 @@ import pandas as pd
 
 @dataclass(frozen=True)
 class StrategyConfig:
+    strategy_type: str = "ma_crossover"  # "ma_crossover" or "donchian_breakout"
     fast: int = 10
     slow: int = 30
     ma_type: str = "sma"                # "sma" or "ema"
@@ -43,6 +44,8 @@ class StrategyConfig:
     initial_capital: float = 100_000.0
 
     def validate(self) -> None:
+        if self.strategy_type not in ("ma_crossover", "donchian_breakout"):
+            raise ValueError("strategy_type must be 'ma_crossover' or 'donchian_breakout'")
         if self.ma_type not in ("sma", "ema"):
             raise ValueError("ma_type must be 'sma' or 'ema'")
         if not (2 <= self.fast < self.slow):
@@ -139,8 +142,28 @@ def build_positions(close: pd.Series, cfg: StrategyConfig):
     fast_ma = moving_average(close, cfg.fast, cfg.ma_type)
     slow_ma = moving_average(close, cfg.slow, cfg.ma_type)
 
-    # Comparisons with NaN are False, so the warm-up period is automatically flat.
-    raw = (fast_ma > slow_ma).astype(float)
+    if cfg.strategy_type == "ma_crossover":
+        # Comparisons with NaN are False, so warm-up is automatically flat.
+        raw = (fast_ma > slow_ma).astype(float)
+    else:
+        # Close-based Donchian entry/exit bands use only completed prior
+        # sessions. Enter above the prior slow-window highest close; exit below
+        # the prior fast-window lowest close. The stateful signal stays long
+        # between those events.
+        prior_high = close.rolling(cfg.slow, min_periods=cfg.slow).max().shift(1)
+        prior_low = close.rolling(cfg.fast, min_periods=cfg.fast).min().shift(1)
+        raw_values = np.zeros(len(close), dtype=float)
+        in_position = False
+        close_values = close.to_numpy()
+        high_values = prior_high.to_numpy()
+        low_values = prior_low.to_numpy()
+        for i in range(len(close)):
+            if in_position and np.isfinite(low_values[i]) and close_values[i] < low_values[i]:
+                in_position = False
+            elif not in_position and np.isfinite(high_values[i]) and close_values[i] > high_values[i]:
+                in_position = True
+            raw_values[i] = float(in_position)
+        raw = pd.Series(raw_values, index=close.index)
 
     signal = pd.Series(
         _apply_stop_loss(raw.to_numpy(), close.to_numpy(), cfg.stop_loss_pct / 100.0),

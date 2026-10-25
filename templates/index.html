@@ -7,27 +7,44 @@
     <div class="container py-5">
         <div class="row align-items-center">
             <div class="col-lg-7">
-                <h1 class="display-4 fw-bold mb-3">AlphaForge</h1>
-                <p class="lead">Backtest a moving-average trend strategy on real prices, with trading costs, volatility targeting and a buy &amp; hold comparison on the same window.</p>
-                <p class="small mb-4">Built by <a href="https://github.com/lokeshsrirangam" class="text-white text-decoration-underline" target="_blank" rel="noopener">Lokesh Srirangam</a></p>
-                <div class="d-flex gap-3 mt-4">
-                    <button class="btn btn-light btn-lg px-4" id="runDefaultBtn">Run Default Test</button>
-                    <a href="#backtester" class="btn btn-outline-light btn-lg px-4">Customize Test</a>
+                <div class="eyebrow"><span class="eyebrow-dot"></span> QUANTITATIVE STRATEGY WORKSPACE</div>
+                <h1 class="display-4 fw-bold mb-3">Research with <span class="headline-accent">discipline.</span></h1>
+                <p class="lead">Evaluate trend and breakout strategies on historical market data, account for trading costs, and compare results against buy and hold.</p>
+                <p class="small mb-4">Transparent metrics. Reproducible assumptions. No simulated performance claims.</p>
+                <div class="hero-actions mt-4">
+                    <div class="baseline-action">
+                        <span class="baseline-label">QUICK START</span>
+                        <button class="btn btn-primary" id="runDefaultBtn"><i class="fa-solid fa-bolt me-2"></i>Run baseline</button>
+                    </div>
+                    <a href="#backtester" class="configure-link"><span class="configure-icon"><i class="fa-solid fa-sliders"></i></span><span><strong>Build a custom run</strong><small>Choose market, signal and risk settings</small></span><i class="fa-solid fa-arrow-right ms-auto"></i></a>
                 </div>
             </div>
-            <div class="col-lg-5 d-none d-lg-block">
-                <img src="https://cdn.pixabay.com/photo/2021/05/31/06/38/stock-chart-6297530_1280.png" alt="Trading Chart" class="img-fluid rounded shadow" style="max-height: 300px;">
+            <div class="col-lg-5 d-none d-lg-flex justify-content-end">
+                <div class="hero-visual" role="img" aria-label="Illustration of a rising equity curve">
+                    <div class="visual-meta"><span>STRATEGY EQUITY</span><span class="visual-period">ILLUSTRATIVE</span></div>
+                    <svg viewBox="0 0 400 125" preserveAspectRatio="none" aria-hidden="true">
+                        <defs><linearGradient id="equityFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4285f4" stop-opacity=".28"/><stop offset="1" stop-color="#4285f4" stop-opacity="0"/></linearGradient></defs>
+                        <path d="M0 105H400M0 72H400M0 39H400" stroke="#263a54" stroke-width="1" stroke-dasharray="3 6" fill="none"/>
+                        <path d="M0 106 L36 95 L70 101 L102 77 L135 82 L169 64 L200 72 L232 50 L264 57 L298 31 L333 38 L366 15 L400 20 L400 125 L0 125Z" fill="url(#equityFill)"/>
+                        <path d="M0 106 L36 95 L70 101 L102 77 L135 82 L169 64 L200 72 L232 50 L264 57 L298 31 L333 38 L366 15 L400 20" stroke="#66a4ff" stroke-width="2.5" fill="none" vector-effect="non-scaling-stroke"/>
+                        <circle cx="366" cy="15" r="4" fill="#8ab8ff"/>
+                    </svg>
+                    <div class="visual-axis"><span>HISTORICAL SERIES</span><span>NET OF COSTS</span></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="container py-5" id="backtester">
-    <div class="row">
-        <div class="col-lg-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light">
-                    <h4 class="mb-0">Strategy Parameters</h4>
+    <div id="requestError" class="alert alert-warning d-none" role="alert" aria-live="polite"></div>
+    <div class="row research-layout">
+        <div class="col-lg-4 research-controls order-lg-2">
+            <div class="card shadow-sm mb-4 config-card">
+                <div class="card-header config-header">
+                    <span class="config-index">01 / SETUP</span>
+                    <h4 class="mb-0">Configure a research run</h4>
+                    <p class="mb-0">Set the market, signal and execution assumptions.</p>
                 </div>
                 <div class="card-body">
                     <form id="backtestForm">
@@ -42,9 +59,18 @@
                         </div>
                         <div id="yahooFields">
                             <div class="mb-3">
-                                <label for="ticker" class="form-label">Ticker</label>
-                                <input type="text" class="form-control" id="ticker" name="ticker" value="^NSEI">
-                                <div class="form-text">Examples: ^NSEI (Nifty 50), RELIANCE.NS, SPY, BTC-USD</div>
+                                <label for="ticker" class="form-label">Market symbol</label>
+                                <div class="input-group ticker-input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
+                                    <input type="text" class="form-control" id="ticker" name="ticker" value="^NSEI" placeholder="Type a Yahoo Finance symbol" autocomplete="off" spellcheck="false" aria-describedby="tickerHelp">
+                                </div>
+                                <div class="form-text" id="tickerHelp">Select an example or enter a supported Yahoo Finance symbol.</div>
+                                <div class="ticker-presets" aria-label="Example market symbols">
+                                    <button type="button" class="ticker-chip" data-ticker="^NSEI">NIFTY 50 <span>^NSEI</span></button>
+                                    <button type="button" class="ticker-chip" data-ticker="RELIANCE.NS">RELIANCE <span>RELIANCE.NS</span></button>
+                                    <button type="button" class="ticker-chip" data-ticker="SPY">S&amp;P 500 <span>SPY</span></button>
+                                    <button type="button" class="ticker-chip" data-ticker="BTC-USD">BITCOIN <span>BTC-USD</span></button>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-6 mb-3">
@@ -75,8 +101,17 @@
                         
                         <hr class="my-4">
                         
-                        <h5 class="card-title mb-3">Moving Averages</h5>
+                        <h5 class="card-title mb-3">Signal Model</h5>
                         <div class="mb-3">
+                            <label for="strategy_type" class="form-label">Strategy</label>
+                            <select class="form-select" id="strategy_type" name="strategy_type">
+                                <option value="ma_crossover" selected>Moving-average crossover</option>
+                                <option value="donchian_breakout">Donchian close breakout</option>
+                            </select>
+                            <div class="form-text" id="strategyHelp">Trend signal: hold when the fast moving average is above the slow average.</div>
+                        </div>
+                        <h5 class="card-title mb-3" id="parameterHeading">Moving Average Parameters</h5>
+                        <div class="mb-3" id="maTypeField">
                             <label class="form-label">MA Type</label>
                             <div class="d-flex">
                                 <div class="form-check me-3">
@@ -94,12 +129,14 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="short_period" class="form-label">Short-term MA Period</label>
+                            <label for="short_period" class="form-label" id="shortPeriodLabel">Fast MA Period</label>
                             <input type="number" class="form-control" id="short_period" name="short_period" value="10" min="2" max="100">
+                            <div class="form-text" id="shortPeriodHelp">Short moving-average lookback.</div>
                         </div>
                         <div class="mb-3">
-                            <label for="long_period" class="form-label">Long-term MA Period</label>
+                            <label for="long_period" class="form-label" id="longPeriodLabel">Slow MA Period</label>
                             <input type="number" class="form-control" id="long_period" name="long_period" value="30" min="5" max="200">
+                            <div class="form-text" id="longPeriodHelp">Long moving-average lookback.</div>
                         </div>
                         
                         <hr class="my-4">
@@ -135,14 +172,138 @@
                             </select>
                         </div>
                         
-                        <button type="button" id="runBacktestBtn" class="btn btn-primary w-100 mt-3">
+                        <button type="button" id="runBacktestBtn" class="btn btn-primary w-100 mt-3 run-backtest-action">
                             <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner" role="status" aria-hidden="true"></span>
                             Run Backtest
                         </button>
                     </form>
                 </div>
             </div>
-            
+
+            <!-- Walk-forward Validation Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0">Walk-Forward Validation</h4>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Select parameters on training data, evaluate on held-out test data. Each test window starts flat; open positions at the end are marked to market.</p>
+
+                    <details>
+                        <summary style="cursor:pointer;" class="text-primary">Walk-Forward Settings</summary>
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label for="train_len" class="form-label">Train Length (bars)</label>
+                                    <input type="number" class="form-control" id="train_len" name="train_len" value="756" min="100" max="5000">
+                                    <div class="form-text">Training window size</div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label for="test_len" class="form-label">Test Length (bars)</label>
+                                    <input type="number" class="form-control" id="test_len" name="test_len" value="252" min="50" max="1000">
+                                    <div class="form-text">Non-overlapping test window</div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info small mb-0">
+                                <strong>Grid (fixed in advance):</strong> slow ∈ [50, 100, 200], fast ∈ [5, 10, 20, 50], keeping only fast &lt; slow.
+                                The grid is never changed after seeing results.
+                            </div>
+                        </div>
+                    </details>
+
+                    <button type="button" id="runWalkforwardBtn" class="btn btn-outline-primary w-100 mt-3">
+                        <span class="spinner-border spinner-border-sm d-none" id="wfLoadingSpinner" role="status" aria-hidden="true"></span>
+                        Run Walk-Forward
+                    </button>
+                </div>
+            </div>
+
+            <!-- Walk-forward Results Container (collapsible) -->
+            <details id="walkforwardResults" class="card shadow-sm mb-4 d-none">
+                <summary class="card-header bg-light d-flex justify-content-between align-items-center" style="cursor:pointer;">
+                    <h4 class="mb-0">Walk-Forward Results</h4>
+                    <span class="small text-muted" id="wfSummaryLine"></span>
+                </summary>
+                <div class="card-body">
+                        <div id="wfWarnings" class="alert alert-warning d-none">
+                            <strong>Notes:</strong>
+                            <ul class="mb-0 mt-2" id="wfWarningList"></ul>
+                        </div>
+
+                        <div class="row text-center mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-1">OOS Sharpe</h6>
+                                        <h4 id="wfOosSharpe">0.00</h4>
+                                        <div class="small text-muted" id="wfOosSharpeSE"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-1">OOS CAGR</h6>
+                                        <h4 id="wfOosCagr">0.00%</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-1">OOS Max DD</h6>
+                                        <h4 id="wfOosMaxDd">0.00%</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="text-muted mb-1">Mean fold Sharpe</h6>
+                                        <h4 id="wfMeanFoldSharpe">0.00</h4>
+                                        <div class="small text-muted">secondary only</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Strategy vs Buy &amp; Hold (Stitched OOS)</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table mb-0" id="wfBenchTable">
+                                    <thead class="table-light"><tr><th>Metric</th><th>Strategy</th><th>Buy &amp; Hold</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Parameter Stability</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table mb-0" id="wfParamTable">
+                                    <thead class="table-light"><tr><th>Fast</th><th>Slow</th><th>Times Chosen</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Per-Fold Results</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table mb-0" id="wfFoldsTable">
+                                    <thead class="table-light"><tr><th>Fold</th><th>Fast</th><th>Slow</th><th>In-Sample Sharpe</th><th>OOS Sharpe</th><th>Train Window</th><th>Test Window</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+            </details>
+
             <div class="card shadow-sm d-none d-lg-block">
                 <div class="card-header bg-light">
                     <h4 class="mb-0">Strategy Explanation</h4>
@@ -161,15 +322,15 @@
             </div>
         </div>
         
-        <div class="col-lg-8">
+        <div class="col-lg-8 research-results order-lg-1">
             <div id="resultsContainer" class="d-none">
                 <div id="warnings" class="alert alert-warning d-none">
                     <strong>Read this before trusting the numbers</strong>
                     <ul class="mb-0 mt-2" id="warningList"></ul>
                 </div>
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">Performance Summary</h4>
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <div><h4 class="mb-0">Performance Summary</h4><div class="summary-caption" id="resultMeta"></div></div>
                         <div>
                             <button class="btn btn-sm btn-outline-secondary" id="downloadReportBtn">
                                 <i class="fas fa-download me-1"></i> Download Report
@@ -182,7 +343,7 @@
                                 <div class="card h-100 border-0 shadow-sm">
                                     <div class="card-body">
                                         <h6 class="text-muted mb-1">Initial Capital</h6>
-                                        <h4 id="initialCapital">$10,000.00</h4>
+                                        <h4 id="initialCapital">—</h4>
                                     </div>
                                 </div>
                             </div>
@@ -190,7 +351,7 @@
                                 <div class="card h-100 border-0 shadow-sm">
                                     <div class="card-body">
                                         <h6 class="text-muted mb-1">Final Value</h6>
-                                        <h4 id="finalValue">$0.00</h4>
+                                        <h4 id="finalValue">—</h4>
                                     </div>
                                 </div>
                             </div>
@@ -198,7 +359,7 @@
                                 <div class="card h-100 border-0 shadow-sm">
                                     <div class="card-body">
                                         <h6 class="text-muted mb-1">Total Return</h6>
-                                        <h4 id="totalReturn">0.00%</h4>
+                                        <h4 id="totalReturn">—</h4>
                                     </div>
                                 </div>
                             </div>
@@ -206,7 +367,7 @@
                                 <div class="card h-100 border-0 shadow-sm">
                                     <div class="card-body">
                                         <h6 class="text-muted mb-1">Annual Return</h6>
-                                        <h4 id="annualizedReturn">0.00%</h4>
+                                        <h4 id="annualizedReturn">—</h4>
                                     </div>
                                 </div>
                             </div>
@@ -328,6 +489,36 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-lg-7">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0">Return Calendar</h4>
+                                <span class="summary-caption">Compounded monthly returns</span>
+                            </div>
+                            <div class="card-body p-2">
+                                <div id="monthlyChart" class="analytics-chart" aria-label="Monthly strategy return heatmap"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm mb-4 h-100">
+                            <div class="card-header bg-light">
+                                <h4 class="mb-0">Market Regime Attribution</h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table mb-0" id="regimeTable">
+                                        <thead><tr><th>Regime</th><th>Sessions</th><th>Strategy avg/day</th><th>Strategy vol</th><th>Strategy Sharpe</th><th>Up sessions</th><th>Buy &amp; Hold Sharpe</th></tr></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <p class="regime-note">Regime is classified using the prior close versus its 200-session moving average. Returns are conditional daily statistics; unclassified warm-up sessions are excluded.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-light">
@@ -363,8 +554,8 @@
                 <div class="mb-4">
                     <i class="fas fa-chart-line fa-4x text-secondary"></i>
                 </div>
-                <h3>Configure your strategy parameters</h3>
-                <p class="text-muted">Set your desired parameters on the left and click "Run Backtest" to see the results here.</p>
+                <h3>Backtest workspace ready</h3>
+                <p class="text-muted">Choose a market and strategy assumptions, then run a simulation to inspect actual historical results here.</p>
                 <p class="mt-4"><button class="btn btn-primary" id="runDefaultBtn2">Or try with default settings</button></p>
             </div>
         </div>
@@ -409,7 +600,7 @@
 <script>
     const DEFAULTS = {
         data_source: "yahoo", ticker: "^NSEI", start_date: "2012-01-01", end_date: "",
-        short_period: 10, long_period: 30, ma_type: "sma",
+        strategy_type: "ma_crossover", short_period: 10, long_period: 30, ma_type: "sma",
         initial_capital: 100000, cost_bps: 10, target_vol: 15, stop_loss: 0, execution_lag: 1
     };
 
@@ -418,15 +609,37 @@
     }
 
     $(document).ready(function() {
+        $(".ticker-chip").on("click", function() {
+            $("#ticker").val($(this).data("ticker")).trigger("focus");
+            $(".ticker-chip").removeClass("active");
+            $(this).addClass("active");
+        });
+        let latestReport = null;
         $("#data_source").change(function() {
             const synthetic = $(this).val() === "synthetic";
             $("#syntheticFields").toggleClass("d-none", !synthetic);
             $("#yahooFields").toggleClass("d-none", synthetic);
         });
 
+        function updateStrategyFields() {
+            const donchian = $("#strategy_type").val() === "donchian_breakout";
+            $("#maTypeField").toggleClass("d-none", donchian);
+            $("#parameterHeading").text(donchian ? "Donchian Channel Parameters" : "Moving Average Parameters");
+            $("#shortPeriodLabel").text(donchian ? "Exit Channel Lookback" : "Fast MA Period");
+            $("#longPeriodLabel").text(donchian ? "Breakout Channel Lookback" : "Slow MA Period");
+            $("#shortPeriodHelp").text(donchian ? "Exit when the close falls below the prior low over this many sessions." : "Short moving-average lookback.");
+            $("#longPeriodHelp").text(donchian ? "Enter above the highest prior close over this many sessions." : "Long moving-average lookback.");
+            $("#strategyHelp").text(donchian
+                            ? "Close-based breakout: enter above the prior slow-window highest close and exit below the prior fast-window lowest close."
+                : "Trend signal: hold when the fast moving average is above the slow average.");
+        }
+        $("#strategy_type").on("change", updateStrategyFields);
+        updateStrategyFields();
+
         $("#runBacktestBtn, #runDefaultBtn, #runDefaultBtn2").click(function() {
+            $("#requestError").addClass("d-none").text("");
             $("#loadingSpinner").removeClass("d-none");
-            $("#runBacktestBtn").prop("disabled", true);
+            $("#runBacktestBtn, #runDefaultBtn, #runDefaultBtn2").prop("disabled", true);
 
             let formData = {};
             if (this.id === "runDefaultBtn" || this.id === "runDefaultBtn2") {
@@ -434,15 +647,24 @@
             } else {
                 $("#backtestForm").serializeArray().forEach(function(f) { formData[f.name] = f.value; });
             }
+            if (Number(formData.short_period) >= Number(formData.long_period)) {
+                $("#loadingSpinner").addClass("d-none");
+                $("#runBacktestBtn, #runDefaultBtn, #runDefaultBtn2").prop("disabled", false);
+                $("#requestError").removeClass("d-none").text("The exit/fast period must be smaller than the entry/slow period.");
+                return;
+            }
 
             $.ajax({
                 url: "/api/backtest", type: "POST", contentType: "application/json",
                 data: JSON.stringify(formData),
                 success: function(r) {
                     $("#loadingSpinner").addClass("d-none");
-                    $("#runBacktestBtn").prop("disabled", false);
+                    $("#runBacktestBtn, #runDefaultBtn, #runDefaultBtn2").prop("disabled", false);
+                    latestReport = {request: formData, results: r};
                     $("#initialMessage").addClass("d-none");
                     $("#resultsContainer").removeClass("d-none");
+                    const strategyName = r.meta.strategy_type === "donchian_breakout" ? "Donchian close breakout" : "MA crossover";
+                    $("#resultMeta").text(r.meta.label + "  ·  " + strategyName + "  ·  " + r.meta.start + " to " + r.meta.end + "  ·  " + r.meta.bars.toLocaleString() + " bars");
 
                     const m = r.metrics;
                     $("#initialCapital").text(m.initial_capital);
@@ -475,6 +697,18 @@
                             .append($("<td></td>").text(row.benchmark)));
                     });
 
+                    const regimeBody = $("#regimeTable tbody").empty();
+                    r.regimes.forEach(function(row) {
+                        regimeBody.append($("<tr></tr>")
+                            .append($("<td></td>").text(row.regime).attr("title", row.definition))
+                            .append($("<td></td>").text(row.strategy.sessions.toLocaleString()))
+                            .append($("<td></td>").text(row.strategy.avg_daily_return))
+                            .append($("<td></td>").text(row.strategy.annualized_vol))
+                            .append($("<td></td>").text(row.strategy.sharpe))
+                            .append($("<td></td>").text(row.strategy.up_sessions))
+                            .append($("<td></td>").text(row.benchmark.sharpe)));
+                    });
+
                     const body = $("#tradeHistory").empty();
                     r.trades.forEach(function(t) {
                         const color = t.profit_loss_class === "positive" ? "text-success" : "text-danger";
@@ -489,18 +723,19 @@
                         body.append(row);
                     });
 
-                    ["price", "equity", "drawdown"].forEach(function(name) {
+                    ["price", "equity", "drawdown", "monthly"].forEach(function(name) {
                         const fig = JSON.parse(r.charts[name + "_chart"]);
-                        Plotly.newPlot(name + "Chart", fig.data, fig.layout, {responsive: true});
+                        Plotly.newPlot(name + "Chart", fig.data, fig.layout, {responsive: true, displaylogo: false});
                     });
 
                     $("html, body").animate({scrollTop: $("#resultsContainer").offset().top - 20}, 500);
                 },
                 error: function(xhr, status, error) {
                     $("#loadingSpinner").addClass("d-none");
-                    $("#runBacktestBtn").prop("disabled", false);
+                    $("#runBacktestBtn, #runDefaultBtn, #runDefaultBtn2").prop("disabled", false);
                     const msg = (xhr.responseJSON && xhr.responseJSON.error) || error || "Request failed";
-                    alert("Error running backtest: " + msg);
+                    $("#requestError").removeClass("d-none").text("Unable to run backtest: " + msg);
+                    $("#requestError")[0].scrollIntoView({behavior: "smooth", block: "center"});
                 }
             });
         });
@@ -508,13 +743,112 @@
         $("#short_period, #long_period").change(function() {
             const s = parseInt($("#short_period").val()), l = parseInt($("#long_period").val());
             if (s >= l) {
-                alert("Short period must be less than long period");
-                $("#short_period").val(l - 1);
+                $("#requestError").removeClass("d-none").text("The exit/fast period must be smaller than the entry/slow period.");
+            } else {
+                $("#requestError").addClass("d-none").text("");
             }
         });
 
         $("#downloadReportBtn").click(function() {
-            alert("Report download is not implemented yet.");
+            if (!latestReport) return;
+            const blob = new Blob([JSON.stringify(latestReport, null, 2)], {type: "application/json"});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "alphaforge-backtest-report.json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        // Walk-forward validation
+        // Every value below is written with textContent, never innerHTML.
+        function wfCell(text) {
+            const td = document.createElement("td");
+            td.textContent = text;
+            return td;
+        }
+
+        function wfRow(values) {
+            const tr = document.createElement("tr");
+            values.forEach(function(v) { tr.appendChild(wfCell(v)); });
+            return tr;
+        }
+
+        $("#runWalkforwardBtn").click(function() {
+            $("#requestError").addClass("d-none").text("");
+            $("#wfLoadingSpinner").removeClass("d-none");
+            $("#runWalkforwardBtn").prop("disabled", true);
+
+            let formData = {};
+            $("#backtestForm").serializeArray().forEach(function(f) { formData[f.name] = f.value; });
+            formData["train_len"] = parseInt($("#train_len").val()) || 756;
+            formData["test_len"] = parseInt($("#test_len").val()) || 252;
+
+            $.ajax({
+                url: "/api/walkforward", type: "POST", contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function(r) {
+                    $("#wfLoadingSpinner").addClass("d-none");
+                    $("#runWalkforwardBtn").prop("disabled", false);
+
+                    const results = document.getElementById("walkforwardResults");
+                    results.classList.remove("d-none");
+                    results.open = true;
+
+                    // OOS metrics
+                    document.getElementById("wfOosSharpe").textContent = r.oos_metrics.sharpe;
+                    document.getElementById("wfOosSharpeSE").textContent = r.oos_metrics.sharpe_se;
+                    document.getElementById("wfOosCagr").textContent = r.oos_metrics.cagr;
+                    document.getElementById("wfOosMaxDd").textContent = r.oos_metrics.max_drawdown;
+                    document.getElementById("wfMeanFoldSharpe").textContent = r.mean_oos_sharpe;
+                    document.getElementById("wfSummaryLine").textContent =
+                        r.meta.label + " | " + r.meta.n_folds + " folds | OOS " +
+                        r.meta.oos_start + " to " + r.meta.oos_end;
+
+                    // Warnings
+                    const wfWarnList = document.getElementById("wfWarningList");
+                    wfWarnList.innerHTML = "";
+                    r.warnings.forEach(function(w) {
+                        const li = document.createElement("li");
+                        li.textContent = w;
+                        wfWarnList.appendChild(li);
+                    });
+                    document.getElementById("wfWarnings").classList.toggle("d-none", r.warnings.length === 0);
+
+                    // Benchmark comparison
+                    const wfBenchBody = document.querySelector("#wfBenchTable tbody");
+                    wfBenchBody.innerHTML = "";
+                    r.comparison.forEach(function(row) {
+                        wfBenchBody.appendChild(wfRow([row.label, row.strategy, row.benchmark]));
+                    });
+
+                    // Parameter stability
+                    const wfParamBody = document.querySelector("#wfParamTable tbody");
+                    wfParamBody.innerHTML = "";
+                    r.param_stability.forEach(function(p) {
+                        wfParamBody.appendChild(wfRow([p.fast, p.slow, p.count]));
+                    });
+
+                    // Per-fold results
+                    const wfFoldsBody = document.querySelector("#wfFoldsTable tbody");
+                    wfFoldsBody.innerHTML = "";
+                    r.folds.forEach(function(fold) {
+                        wfFoldsBody.appendChild(wfRow([
+                            fold.fold, fold.fast, fold.slow, fold.is_sharpe, fold.oos_sharpe,
+                            fold.train_start + " to " + fold.train_end,
+                            fold.test_start + " to " + fold.test_end
+                        ]));
+                    });
+
+                    $("html, body").animate({scrollTop: $(results).offset().top - 20}, 500);
+                },
+                error: function(xhr, status, error) {
+                    $("#wfLoadingSpinner").addClass("d-none");
+                    $("#runWalkforwardBtn").prop("disabled", false);
+                    const msg = (xhr.responseJSON && xhr.responseJSON.error) || error || "Request failed";
+                    $("#requestError").removeClass("d-none").text("Unable to run walk-forward validation: " + msg);
+                    $("#requestError")[0].scrollIntoView({behavior: "smooth", block: "center"});
+                }
+            });
         });
     });
 </script>

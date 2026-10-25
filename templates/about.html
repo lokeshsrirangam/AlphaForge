@@ -14,7 +14,7 @@
                     <h3 class="mt-4 mb-3">How a backtest runs</h3>
                     <ol>
                         <li>Load adjusted daily closes from Yahoo Finance (cached locally).</li>
-                        <li>Compute a fast and a slow moving average (SMA or EMA). Candidate: long when fast is above slow.</li>
+                        <li>Run either a fast/slow moving-average crossover or a Donchian breakout with separate breakout-entry and channel-exit windows.</li>
                         <li>Size the position with volatility targeting, so exposure shrinks when the market gets wild.</li>
                         <li>Execute on the next close, charge trading costs on every change in position, and apply an optional close-based stop.</li>
                         <li>Report performance net of costs next to buy &amp; hold, measured over the same window.</li>
@@ -28,6 +28,15 @@
                         <li><strong>Statistical honesty.</strong> Sharpe is shown with its standard error, and the dashboard warns about too few trades, short samples and suspiciously high results.</li>
                         <li><strong>Null test.</strong> On driftless random walks the average Sharpe is about zero, which shows the engine does not manufacture edge.</li>
                     </ul>
+
+                    <h3 class="mt-4 mb-3">Research diagnostics</h3>
+                    <ul>
+                        <li><strong>Return calendar:</strong> visualizes monthly compounded strategy returns to expose uneven performance through time.</li>
+                        <li><strong>Regime attribution:</strong> compares strategy and benchmark daily returns when the prior close is above or below its 200-session average.</li>
+                        <li><strong>Walk-forward evaluation:</strong> tests parameter selection on later data that was not used to choose those parameters.</li>
+                        <li><strong>Two signal families:</strong> moving-average trend following and a close-based Donchian breakout, both evaluated with the same sizing, execution and cost model.</li>
+                    </ul>
+                    <p class="small text-muted">These views describe the historical sample. Regime slices are conditional and non-contiguous; parameter searches and backtests can still overfit.</p>
 
                     <h3 class="mt-4 mb-3">Known limitations</h3>
                     <ul class="mb-0">
