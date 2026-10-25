@@ -88,10 +88,8 @@ app.py            Flask application and API routes
 
 AlphaForge currently tests one instrument at a time, uses daily bars and supports long-only positions. Yahoo Finance data is free and may contain gaps or errors. The simulator does not model every real-world factor, such as market impact, partial fills, taxes specific to your account or intraday execution. Results depend on the selected dates and assumptions; they are not investment advice.
 
-## Background
-
-The project began with the moving-average crossover exercise in Chapter 4 of *Practical Python for Effective Algorithmic Trading* by Kuldeep Singh Rathore. AlphaForge has since been extended with its own data handling, backtest engine, performance analysis, tests and web dashboard.
-
 ## Author
 
 Lokesh Srirangam · [GitHub](https://github.com/lokeshsrirangam)
+
+The initial moving-average exercise was based on Chapter 4 of *Practical Python for Effective Algorithmic Trading* by Kuldeep Singh Rathore. AlphaForge has been extended with additional strategies, analysis and a web dashboard.
