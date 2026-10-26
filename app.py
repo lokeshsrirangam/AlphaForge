@@ -16,7 +16,8 @@ from alphaforge import StrategyConfig, DataError, load_prices, run_backtest, syn
 from alphaforge import charts
 from alphaforge.walkforward import build_grid, walk_forward
 
-app = Flask(__name__)
+# Keep the same root-level asset URLs in local Flask and Vercel deployments.
+app = Flask(__name__, static_folder="public", static_url_path="")
 
 
 # --------------------------------------------------------------------------- #

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import re
 import time
+import os
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -34,8 +36,13 @@ def _cache_path(cache_dir: Path, ticker: str, start: str, end: str | None) -> Pa
 
 
 def load_prices(ticker: str, start: str = "2012-01-01", end: str | None = None,
-                cache_dir: str | Path = "data_cache") -> pd.Series:
+                cache_dir: str | Path | None = None) -> pd.Series:
     """Adjusted daily closes (splits and dividends adjusted)."""
+    if cache_dir is None:
+        # Serverless deployments have an ephemeral, writable /tmp directory.
+        # Keep the familiar project-local cache for desktop development.
+        cache_dir = (Path(tempfile.gettempdir()) / "alphaforge-data-cache"
+                     if os.environ.get("VERCEL") else Path("data_cache"))
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     path = _cache_path(cache_dir, ticker, start, end)
